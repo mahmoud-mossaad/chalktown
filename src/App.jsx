@@ -34,14 +34,15 @@ function useDeviceMode() {
 function Dust({ isMobile, isTablet }) {
   const points = useRef()
   const positions = useMemo(() => {
-    const result = new Float32Array((isMobile ? 2600 : isTablet ? 3600 : 5200) * 3)
+    const particleCount = isMobile ? 4000 : isTablet ? 6000 : 20000
+    const result = new Float32Array(particleCount * 3)
     for (let i = 0; i < result.length; i += 3) {
       result[i] = (Math.random() - 0.5) * 32
       result[i + 1] = (Math.random() - 0.5) * 18
       result[i + 2] = -Math.random() * 70 + 6
     }
     return result
-  }, [isMobile])
+  }, [isMobile, isTablet])
 
   useFrame(({ clock, pointer }) => {
     if (!points.current) return
@@ -58,9 +59,9 @@ function Dust({ isMobile, isTablet }) {
         color="#d9d9d9"
         size={isMobile ? 0.018 : isTablet ? 0.016 : 0.013}
         transparent
-        opacity={0.68}
+        opacity={0.90}
         sizeAttenuation
-        depthWrite={false}
+        depthWrite={true}
       />
     </points>
   )
@@ -279,7 +280,7 @@ function AboutPortal({ activeIndex, journey, isMobile, isTablet }) {
       <Text ref={labels[0]} position={[0, isMobile ? 1.25 : isTablet ? 1.48 : 1.75, 0]} fontSize={isMobile ? 0.09 : isTablet ? 0.105 : 0.12} letterSpacing={0.18} color="#777" anchorX="center">07 — ABOUT</Text>
       <Text ref={labels[1]} position={[0, isMobile ? -1.25 : isTablet ? -1.48 : -1.65, 0]} fontSize={isMobile ? 0.24 : isTablet ? 0.29 : 0.34} letterSpacing={0.02} color="#fff" anchorX="center">CHALK TOWN</Text>
       <Text ref={labels[2]} position={[0, isMobile ? -1.58 : isTablet ? -1.88 : -2.08, 0]} maxWidth={isMobile ? 4.8 : isTablet ? 5.7 : 6.4} textAlign="center" fontSize={isMobile ? 0.08 : isTablet ? 0.098 : 0.115} lineHeight={1.6} color="#8c8c8c" anchorX="center">
-        A MONOCHROME ARCHIVE OF INTERACTIVE EXPERIMENTS BY SIOOD.
+        A MONOCHROME ARCHIVE OF INTERACTIVE EXPERIMENTS.
       </Text>
       <Text ref={labels[3]} position={[0, isMobile ? -2.02 : isTablet ? -2.35 : -2.66, 0]} maxWidth={isMobile ? 4.8 : isTablet ? 6.2 : 7.2} textAlign="center" fontSize={isMobile ? 0.062 : isTablet ? 0.075 : 0.085} lineHeight={1.7} color="#555" anchorX="center">
         SOUND · GESTURE · MEMORY · DESTRUCTION · NATURE · INVISIBLE FORCES
@@ -390,7 +391,6 @@ function Intro({ started, onStart }) {
     <div className={`intro ${started ? 'intro--hidden' : ''}`}>
       <p className="intro-kicker">INTERACTIVE ART & DIGITAL EXPERIMENTS</p>
       <h1>CHALK<br />TOWN</h1>
-      <p className="intro-credit">made by siood</p>
       <p className="intro-note">A JOURNEY THROUGH SIGNAL, MEMORY, MATTER AND DECAY.</p>
       <button className="enter-button" onClick={onStart}>
         <span>ENTER</span>
