@@ -4,6 +4,8 @@ import { animate } from 'animejs'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { projects } from './projects'
+import LivingSignal from './experiences/LivingSignal/TheLivingSignal-ChalkTown.jsx'
+import NegativePresence from './experiences/NegativePresence/NegativePresence.jsx'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
@@ -345,7 +347,7 @@ function Scene({ journey, targetJourney, activeIndex, onOpen, isMobile, isTablet
   )
 }
 
-function ProjectPanel({ project, onClose }) {
+function ProjectPanel({ project, onClose, onEnter }) {
   const panel = useRef()
 
   useEffect(() => {
@@ -377,12 +379,98 @@ function ProjectPanel({ project, onClose }) {
           <p className="description">{project.description}</p>
           <p className="technology">{project.technology}</p>
           <div className="project-actions">
-            <button>ENTER EXPERIMENT</button>
+            <button onClick={onEnter}>ENTER EXPERIMENT</button>
             <button className="ghost">VIEW PROCESS</button>
           </div>
         </div>
       </article>
     </div>
+  )
+}
+
+function ExperienceHost({ project, onReturn }) {
+  const [phase, setPhase] = useState('arriving')
+  const [worldMounted, setWorldMounted] = useState(false)
+  const returningRef = useRef(false)
+  const timersRef = useRef([])
+
+  const schedule = (callback, delay) => {
+    const timer = window.setTimeout(callback, delay)
+    timersRef.current.push(timer)
+    return timer
+  }
+
+  const finish = () => {
+    if (returningRef.current) return
+    returningRef.current = true
+    setPhase('returning')
+
+    schedule(() => {
+      setWorldMounted(false)
+      onReturn()
+    }, 900)
+  }
+
+  useEffect(() => {
+    returningRef.current = false
+    setPhase('arriving')
+    setWorldMounted(false)
+
+    // The portal reaches full-screen first. During the short blackout the
+    // project mounts and measures its final viewport, avoiding stale centers.
+    schedule(() => setPhase('blackout'), 1500)
+    schedule(() => {
+      setWorldMounted(true)
+      setPhase('active')
+    }, 1850)
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') finish()
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      timersRef.current.forEach((id) => window.clearTimeout(id))
+      timersRef.current = []
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [project.id])
+
+  return (
+    <section className={`experience-host experience-host--${phase}`} aria-label={`${project.title} experience`}>
+      <div className="portal-transition" aria-hidden="true">
+        <div className="portal-transition__dust" />
+        <div className="portal-transition__ring">
+          <span className="portal-transition__symbol">{project.symbol}</span>
+        </div>
+        <div className="portal-transition__copy">
+          <span>{project.number}</span>
+          <h2>{project.title}</h2>
+          <p>{project.subtitle}</p>
+        </div>
+      </div>
+
+      <div className="project-world">
+        {worldMounted && (
+          project.id === 'signal' ? (
+            <LivingSignal onExit={finish} />
+          ) : project.id === 'presence' ? (
+            <NegativePresence onExit={finish} />
+          ) : (
+            <div className="world-placeholder">
+              <button onClick={finish}>RETURN</button>
+              <span>{project.number}</span>
+              <div className="world-placeholder__rune">{project.symbol}</div>
+              <h2>{project.title}</h2>
+              <p>This chamber is prepared for the original project experience.</p>
+            </div>
+          )
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -434,6 +522,7 @@ export default function App() {
   const [started, setStarted] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [openedProject, setOpenedProject] = useState(null)
+  const [activeExperience, setActiveExperience] = useState(null)
   const journey = useRef(0)
   const targetJourney = useRef(0)
 
@@ -446,7 +535,7 @@ export default function App() {
   useEffect(() => {
     let wheelLocked = false
     const onWheel = (event) => {
-      if (!started || openedProject !== null) return
+      if (!started || openedProject !== null || activeExperience !== null) return
       if (isCompact) {
         if (wheelLocked || Math.abs(event.deltaY) < 12) return
         wheelLocked = true
@@ -464,7 +553,7 @@ export default function App() {
     }
 
     const onKey = (event) => {
-      if (!started || openedProject !== null) return
+      if (!started || openedProject !== null || activeExperience !== null) return
       if (['ArrowDown', 'ArrowRight'].includes(event.key)) goTo(activeIndex + 1)
       if (['ArrowUp', 'ArrowLeft'].includes(event.key)) goTo(activeIndex - 1)
       if (event.key === 'Enter') {
@@ -478,7 +567,7 @@ export default function App() {
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
     }
-  }, [activeIndex, openedProject, started, isCompact])
+  }, [activeIndex, openedProject, activeExperience, started, isCompact])
 
   const start = () => {
     setStarted(true)
@@ -486,13 +575,13 @@ export default function App() {
   }
 
   const onTouchStart = (event) => {
-    if (!isCompact || !started || openedProject !== null) return
+    if (!isCompact || !started || openedProject !== null || activeExperience !== null) return
     const touch = event.touches[0]
     touchStart.current = { x: touch.clientX, y: touch.clientY }
   }
 
   const onTouchEnd = (event) => {
-    if (!isCompact || !touchStart.current || openedProject !== null) return
+    if (!isCompact || !touchStart.current || openedProject !== null || activeExperience !== null) return
     const touch = event.changedTouches[0]
     const dx = touch.clientX - touchStart.current.x
     const dy = touch.clientY - touchStart.current.y
@@ -544,7 +633,21 @@ export default function App() {
       </button>
 
       {openedProject !== null && (
-        <ProjectPanel project={projects[openedProject]} onClose={() => setOpenedProject(null)} />
+        <ProjectPanel
+          project={projects[openedProject]}
+          onClose={() => setOpenedProject(null)}
+          onEnter={() => {
+            setActiveExperience(openedProject)
+            setOpenedProject(null)
+          }}
+        />
+      )}
+
+      {activeExperience !== null && (
+        <ExperienceHost
+          project={projects[activeExperience]}
+          onReturn={() => setActiveExperience(null)}
+        />
       )}
 
     </main>

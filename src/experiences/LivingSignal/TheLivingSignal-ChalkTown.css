@@ -1,0 +1,22 @@
+.visualizer { position: fixed; inset: 0; overflow: hidden; background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; }
+.canvas-container, .canvas-container canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.interface-toggle { position: fixed; top: max(22px, env(safe-area-inset-top)); right: max(22px, env(safe-area-inset-right)); z-index: 12; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.25); border-radius: 50%; background: rgba(0,0,0,.35); color: rgba(255,255,255,.75); font-size: 20px; cursor: pointer; backdrop-filter: blur(8px); }
+.controls { position: fixed; right: max(22px, env(safe-area-inset-right)); top: 76px; z-index: 10; width: min(280px, calc(100vw - 44px)); padding: 18px; border: 1px solid rgba(255,255,255,.13); background: rgba(2,2,2,.78); backdrop-filter: blur(16px); opacity: 0; transform: translateY(-10px); pointer-events: none; transition: .35s ease; }
+.controls-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.microphone-button { width: 100%; min-height: 44px; border: 1px solid rgba(255,255,255,.25); background: transparent; color: #ddd; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+.microphone-indicator { display: inline-block; width: 6px; height: 6px; margin-right: 10px; border: 1px solid #777; border-radius: 50%; }
+.microphone-indicator.active { background: #fff; box-shadow: 0 0 12px #fff; }
+.settings-panel { display: grid; gap: 14px; margin-top: 18px; }
+.settings-panel label { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 10px; color: #777; font-size: 8px; letter-spacing: .14em; text-transform: uppercase; }
+.settings-panel input { width: 100%; accent-color: #ddd; }
+.error-message { color: #d0a0a0; font-size: 9px; line-height: 1.5; }
+.entity-status { position: fixed; left: 50%; bottom: 34px; z-index: 8; margin: 0; transform: translateX(-50%); color: rgba(255,255,255,.46); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; pointer-events: none; white-space: nowrap; }
+.return-button { position: fixed; top: max(22px, env(safe-area-inset-top)); left: max(22px, env(safe-area-inset-left)); z-index: 12; border: 0; padding: 10px 0; background: transparent; color: rgba(255,255,255,.58); font: inherit; font-size: 9px; letter-spacing: .24em; cursor: pointer; transition: color 240ms ease, opacity 240ms ease; }
+.return-button:hover, .return-button:focus-visible { color: #fff; }
+.return-button:disabled { cursor: default; opacity: .4; }
+@media (max-width: 800px) {
+  .interface-toggle { top: max(15px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); }
+  .controls { top: 64px; right: 16px; }
+  .entity-status { bottom: calc(24px + env(safe-area-inset-bottom)); max-width: calc(100vw - 48px); overflow: hidden; text-overflow: ellipsis; font-size: 8px; letter-spacing: .17em; }
+  .return-button { top: max(15px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); }
+}

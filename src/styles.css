@@ -529,3 +529,98 @@ button { color: inherit; font: inherit; }
   .experience--tablet .project-copy h2 { margin: 14px 0 22px; }
   .experience--tablet .project-actions { margin-top: 28px; }
 }
+
+/* Shared entrance and return ritual for every project world. */
+.experience-host {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #000;
+}
+.project-world { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: #000; transition: opacity 700ms ease; }
+.experience-host--blackout .project-world { opacity: 0; }
+.experience-host--active .project-world { opacity: 1; pointer-events: auto; }
+.experience-host--returning .project-world { opacity: 0; pointer-events: none; transition-delay: 0ms; }
+
+.portal-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #020202;
+  pointer-events: none;
+  transition: opacity 750ms ease 1050ms, visibility 0s linear 1800ms;
+}
+.experience-host--blackout .portal-transition { opacity: 0; visibility: visible; transition: opacity 250ms ease; }
+.experience-host--active .portal-transition { opacity: 0; visibility: hidden; transition: none; }
+.experience-host--returning .portal-transition { opacity: 1; visibility: visible; transition: opacity 650ms ease; }
+.portal-transition__dust {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.portal-transition::before,
+.portal-transition::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background-image: radial-gradient(circle, rgba(255,255,255,.8) 0 1px, transparent 1.5px);
+  background-size: 47px 47px;
+  opacity: .12;
+  animation: portalDust 8s linear infinite;
+}
+.portal-transition::after { background-size: 81px 81px; opacity: .07; animation-direction: reverse; }
+.portal-transition__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  margin: 0;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: min(34vw, 280px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255,255,255,.84);
+  border-radius: 50%;
+  box-shadow: 0 0 45px rgba(255,255,255,.12), inset 0 0 35px rgba(255,255,255,.06);
+  animation: portalOpen 1800ms cubic-bezier(.72,0,.18,1) forwards;
+}
+.portal-transition__ring::before,
+.portal-transition__ring::after {
+  content: '';
+  position: absolute;
+  inset: -9%;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 50%;
+  animation: portalOrbit 5s linear infinite;
+}
+.portal-transition__ring::after { inset: -19%; border-style: dashed; animation-duration: 9s; animation-direction: reverse; }
+.portal-transition__symbol { color: #fff; font-size: clamp(42px, 7vw, 76px); text-shadow: 0 0 22px rgba(255,255,255,.55); }
+.portal-transition__copy { position: absolute; left: 50%; bottom: 9vh; z-index: 3; width: min(680px, calc(100% - 48px)); transform: translateX(-50%); text-align: center; text-transform: uppercase; letter-spacing: .18em; }
+.portal-transition__copy span { color: #666; font-size: 9px; }
+.portal-transition__copy h2 { margin: 13px 0 10px; color: #eee; font-size: clamp(27px, 5vw, 58px); font-weight: 300; letter-spacing: .05em; }
+.portal-transition__copy p { margin: 0; color: #666; font-size: 8px; }
+.experience-host--returning .portal-transition__ring { animation: portalClose 850ms cubic-bezier(.75,0,.2,1) forwards; }
+.experience-host--returning .portal-transition__copy { opacity: 0; }
+
+.world-placeholder { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 18px; background: #020202; color: #aaa; text-align: center; }
+.world-placeholder button { position: fixed; top: 26px; left: 26px; border: 0; background: none; color: #777; letter-spacing: .22em; cursor: pointer; }
+.world-placeholder > span { color: #555; font-size: 9px; letter-spacing: .22em; }
+.world-placeholder__rune { display: grid; place-items: center; width: 150px; aspect-ratio: 1; border: 1px solid #333; border-radius: 50%; color: #eee; font-size: 48px; }
+.world-placeholder h2 { margin: 0; color: #eee; font-size: clamp(36px, 7vw, 76px); font-weight: 300; }
+.world-placeholder p { max-width: 460px; color: #666; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+
+@keyframes portalOpen { 0% { transform: scale(.05); opacity: 0; } 38% { opacity: 1; } 72% { transform: scale(1); } 100% { transform: scale(8); opacity: 0; } }
+@keyframes portalClose { 0% { transform: scale(8); opacity: 0; } 35% { opacity: 1; } 100% { transform: scale(.08); opacity: 0; } }
+@keyframes portalOrbit { to { transform: rotate(360deg); } }
+@keyframes portalDust { to { transform: translate3d(47px, 47px, 0) rotate(2deg); } }
+
+@media (max-width: 800px) {
+  .portal-transition__ring { width: 46vw; }
+  .portal-transition__copy { bottom: 13vh; }
+}

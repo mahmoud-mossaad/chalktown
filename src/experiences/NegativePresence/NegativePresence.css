@@ -1,0 +1,513 @@
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+.np-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+
+.np-source-video {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.np-output-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.np-screen-texture {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  opacity: 0.1;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0,
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.06) 0,
+      rgba(0, 0, 0, 0.06) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+
+.np-screen-texture--active {
+  opacity: 0.22;
+  animation:
+    directional-texture-shake
+    90ms
+    steps(2, end)
+    infinite;
+}
+
+.np-intro {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(28px, 8vw, 125px);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.97),
+      rgba(0, 0, 0, 0.82) 55%,
+      rgba(0, 0, 0, 0.35)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.025) 0,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+
+.np-intro__label {
+  margin: 0 0 24px;
+  color: rgba(255, 255, 255, 0.58);
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 10px;
+  letter-spacing: 0.23em;
+  text-transform: uppercase;
+}
+
+.np-intro h1 {
+  margin: 0;
+  font-size: clamp(58px, 10vw, 150px);
+  font-weight: 500;
+  line-height: 0.79;
+  letter-spacing: -0.085em;
+  text-transform: uppercase;
+}
+
+.np-intro__description {
+  max-width: 590px;
+  margin: 33px 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: clamp(14px, 1.35vw, 19px);
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.np-primary-button,
+.np-secondary-button,
+.np-record-button,
+.np-download-button {
+  border: 1px solid
+    rgba(255, 255, 255, 0.72);
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.np-primary-button {
+  min-width: 220px;
+  padding: 17px 24px;
+}
+
+.np-secondary-button,
+.np-record-button,
+.np-download-button {
+  padding: 10px 13px;
+  white-space: nowrap;
+}
+
+.np-primary-button:hover,
+.np-secondary-button:hover,
+.np-record-button:hover,
+.np-download-button:hover {
+  color: #000;
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.np-record-button {
+  border-color:
+    rgba(255, 120, 120, 0.9);
+}
+
+.np-record-button--active {
+  color: #fff;
+  background: rgba(150, 0, 0, 0.75);
+  animation:
+    recording-pulse
+    1.2s
+    ease-in-out
+    infinite;
+}
+
+.np-error-message {
+  max-width: 650px;
+  margin: 20px 0 0;
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.np-status-bar {
+  position: absolute;
+  z-index: 5;
+  top: 22px;
+  right: 26px;
+  left: 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.np-controls {
+  position: absolute;
+  z-index: 6;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(230px, 1fr))
+    minmax(220px, auto);
+  gap: 14px;
+  align-items: start;
+  max-height: 44vh;
+  padding: 15px 16px;
+  overflow-y: auto;
+  border: 1px solid
+    rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.np-control-group {
+  display: grid;
+  gap: 13px;
+  padding-right: 13px;
+  border-right: 1px solid
+    rgba(255, 255, 255, 0.13);
+}
+
+.np-control-group h2 {
+  margin: 0 0 3px;
+  color: rgba(255, 255, 255, 0.55);
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 9px;
+  font-weight: normal;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.np-meter {
+  min-width: 120px;
+}
+
+.np-meter__track {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  background:
+    rgba(255, 255, 255, 0.22);
+}
+
+.np-meter__fill {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 50ms linear;
+}
+
+.np-control {
+  display: block;
+}
+
+.np-control__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.np-control__header output {
+  min-width: 55px;
+  text-align: right;
+}
+
+.np-control input[type="range"] {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin: 0;
+  appearance: none;
+  border: 0;
+  outline: 0;
+  background:
+    rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+}
+
+.np-control
+  input[type="range"]::-webkit-slider-thumb {
+  width: 9px;
+  height: 9px;
+  appearance: none;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.np-control
+  input[type="range"]::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.np-control select {
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.32);
+  border-radius: 0;
+  color: #fff;
+  background: #111;
+  outline: none;
+  cursor: pointer;
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.np-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  align-items: stretch;
+}
+
+.np-toggle {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  cursor: pointer;
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.np-toggle input {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  accent-color: #fff;
+}
+
+.np-recording-panel {
+  position: absolute;
+  z-index: 8;
+  top: 55px;
+  right: 20px;
+  width: min(
+    330px,
+    calc(100vw - 40px)
+  );
+  padding: 12px;
+  border: 1px solid
+    rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.86);
+  backdrop-filter: blur(12px);
+}
+
+.np-recording-panel > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.np-recording-panel__label {
+  font-family:
+    "Courier New",
+    Courier,
+    monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.np-recording-preview {
+  display: block;
+  width: 100%;
+  max-height: 210px;
+  background: #000;
+}
+
+@keyframes directional-texture-shake {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  25% {
+    transform: translate(-2px, 1px);
+  }
+
+  50% {
+    transform: translate(3px, -1px);
+  }
+
+  75% {
+    transform: translate(-1px, -1px);
+  }
+
+  100% {
+    transform: translate(2px, 1px);
+  }
+}
+
+@keyframes recording-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.65;
+  }
+}
+
+@media (max-width: 1100px) {
+   .np-controls {
+    grid-template-columns:
+      repeat(2, minmax(240px, 1fr));
+  }
+
+   .np-actions {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 700px) {
+   .np-intro {
+    justify-content: flex-end;
+    padding: 22px 20px 48px;
+  }
+
+   .np-intro h1 {
+    font-size: clamp(
+      48px,
+      15vw,
+      76px
+    );
+  }
+
+   .np-status-bar {
+    top: 15px;
+    right: 15px;
+    left: 15px;
+  }
+
+   .np-controls {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    grid-template-columns: 1fr;
+    max-height: 54vh;
+  }
+
+   .np-control-group {
+    padding-right: 0;
+    padding-bottom: 14px;
+    border-right: 0;
+    border-bottom: 1px solid
+      rgba(255, 255, 255, 0.13);
+  }
+
+   .np-recording-panel {
+    top: 44px;
+    right: 10px;
+  }
+}
+.negative-presence { position:absolute; inset:0; width:100%; height:100%; min-height:100%; background:#000; overflow:hidden; }
+.negative-presence__return { position:absolute; z-index:40; top:20px; left:20px; padding:10px 14px; border:1px solid rgba(255,255,255,.45); background:rgba(0,0,0,.55); color:#fff; font:10px/1 "IBM Plex Mono", monospace; letter-spacing:.12em; cursor:pointer; backdrop-filter:blur(8px); }
+.negative-presence__return:hover { background:#fff; color:#000; }
